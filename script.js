@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('data.csv')
+    fetch('Dsb.csv')
         .then(response => response.text())
         .then(data => {
             const lines = data.split('\n');
