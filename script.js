@@ -9,43 +9,50 @@ function parseCSV(data) {
     return rows;
 }
 
-function createDropdowns(headers) {
-    const dropdownContainer = document.getElementById('dropdowns');
-    headers.forEach((header, index) => {
-        const label = document.createElement('label');
-        label.innerText = `Menu ${index + 1}: `;
-        const select = document.createElement('select');
-        select.id = `menu${index + 1}`;
-        select.name = `menu${index + 1}`;
+function populateHeaders(headers) {
+    const headerSelect = document.getElementById('headerSelect');
+    headers.forEach(header => {
+        const option = document.createElement('option');
+        option.value = header;
+        option.innerText = header;
+        headerSelect.appendChild(option);
+    });
+}
 
-        // Add options from the headers
-        headers.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.innerText = option;
-            select.appendChild(optionElement);
-        });
-
-        dropdownContainer.appendChild(label);
-        dropdownContainer.appendChild(select);
-        dropdownContainer.appendChild(document.createElement('br'));
+function populateRows(data) {
+    const rowSelect = document.getElementById('rowSelect');
+    data.forEach((row, index) => {
+        if (index > 0) { // Skip the header row
+            const option = document.createElement('option');
+            option.value = row[0]; // Use first column value
+            option.innerText = row[0];
+            rowSelect.appendChild(option);
+        }
     });
 }
 
 document.getElementById('dropdownForm').addEventListener('submit', function(event) {
     event.preventDefault(); // Prevent default form submission
 
-    let sum = 0;
-    for (let i = 1; i <= 5; i++) {
-        const value = parseInt(document.getElementById(`menu${i}`).value);
-        sum += value;
-    }
-    
-    document.getElementById('result').innerText = 'Total Sum: ' + sum;
+    const selectedHeader = document.getElementById('headerSelect').value;
+    const selectedRow = document.getElementById('rowSelect').value;
+
+    fetchCSV('data.csv').then(csvData => {
+        const parsedData = parseCSV(csvData);
+        const headerIndex = parsedData[0].indexOf(selectedHeader);
+        const rowIndex = parsedData.findIndex(row => row[0] === selectedRow);
+
+        if (headerIndex !== -1 && rowIndex !== -1) {
+            const value = parsedData[rowIndex][headerIndex];
+            document.getElementById('result').innerText = `Value: ${value}`;
+        }
+    });
 });
 
 (async function() {
     const csvData = await fetchCSV('Dsb.csv');
     const parsedData = parseCSV(csvData);
-    createDropdowns(parsedData[0]); // Use the first row for dropdown options
+    
+    populateHeaders(parsedData[0]); // Populate headers from the first row
+    populateRows(parsedData); // Populate rows from the first column
 })();
