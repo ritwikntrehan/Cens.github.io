@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedHeader = headerSelect.value;
         const selectedRow = rowSelect.value;
 
-        fetchCSV('data.csv').then(csvData => {
+        fetchCSV('New.csv').then(csvData => {
             const parsedData = parseCSV(csvData);
             const headerIndex = parsedData[0].indexOf(selectedHeader);
             const rowIndex = parsedData.findIndex(row => row[0] === selectedRow);
