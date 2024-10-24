@@ -1,48 +1,51 @@
-document.addEventListener('DOMContentLoaded', () => {
-    fetch('Dsb.csv')
-        .then(response => response.text())
-        .then(data => {
-            const lines = data.split('\n');
-            const headers = lines[0].split(',');
+async function fetchCSV(url) {
+    const response = await fetch(url);
+    const data = await response.text();
+    return data;
+}
 
-            const form = document.getElementById('dropdownForm');
+function parseCSV(data) {
+    const rows = data.split('\n').map(row => row.split(','));
+    return rows;
+}
 
-            headers.forEach((header, index) => {
-                const label = document.createElement('label');
-                label.setAttribute('for', `menu${index + 1}`);
-                label.textContent = header;
+function createDropdowns(headers) {
+    const dropdownContainer = document.getElementById('dropdowns');
+    headers.forEach((header, index) => {
+        const label = document.createElement('label');
+        label.innerText = `Menu ${index + 1}: `;
+        const select = document.createElement('select');
+        select.id = `menu${index + 1}`;
+        select.name = `menu${index + 1}`;
 
-                const select = document.createElement('select');
-                select.id = `menu${index + 1}`;
-                select.name = `menu${index + 1}`;
-                
-                // You can customize the options here
-                select.innerHTML = `
-                    <option value="1">Option 1</option>
-                    <option value="2">Option 2</option>
-                    <option value="3">Option 3</option>
-                `;
+        // Add options from the headers
+        headers.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.value = option;
+            optionElement.innerText = option;
+            select.appendChild(optionElement);
+        });
 
-                form.appendChild(label);
-                form.appendChild(select);
-            });
+        dropdownContainer.appendChild(label);
+        dropdownContainer.appendChild(select);
+        dropdownContainer.appendChild(document.createElement('br'));
+    });
+}
 
-            const submitButton = document.createElement('button');
-            submitButton.type = 'submit';
-            submitButton.textContent = 'Submit';
-            form.appendChild(submitButton);
+document.getElementById('dropdownForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent default form submission
 
-            form.addEventListener('submit', function(event) {
-                event.preventDefault();
-                let sum = 0;
-
-                for (let i = 0; i < headers.length; i++) {
-                    const selectedValue = parseInt(document.getElementById(`menu${i + 1}`).value);
-                    sum += selectedValue;
-                }
-
-                document.getElementById('result').innerText = 'Total Sum: ' + sum;
-            });
-        })
-        .catch(error => console.error('Error fetching CSV:', error));
+    let sum = 0;
+    for (let i = 1; i <= 5; i++) {
+        const value = parseInt(document.getElementById(`menu${i}`).value);
+        sum += value;
+    }
+    
+    document.getElementById('result').innerText = 'Total Sum: ' + sum;
 });
+
+(async function() {
+    const csvData = await fetchCSV('Dsb.csv');
+    const parsedData = parseCSV(csvData);
+    createDropdowns(parsedData[0]); // Use the first row for dropdown options
+})();
